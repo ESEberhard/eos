@@ -435,19 +435,19 @@ namespace eos
                 _re_t_omega(p["0->pipi::Re{t_omega}@EGJvD2020"], *this),
                 _im_t_omega(p["0->pipi::Im{t_omega}@EGJvD2020"], *this),
 
-                blaschke_p(std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_no_pole, *this, std::placeholders::_1))
+                blaschke_p([=] (const double &) -> complex<double> { return 1.0; })
             {
                 if ((_opt_rho_pole.value() == "on") && (_opt_omega_pole.value() == "on"))
                 {
-                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_rho_omega, *this, std::placeholders::_1);
+                    blaschke_p = [=] (const double & q2) -> complex<double> { return this->blaschke_p_rho(q2) * this->blaschke_p_omega(q2); };
                 }
                 else if (_opt_rho_pole.value() == "on")
                 {
-                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_rho, *this, std::placeholders::_1);
+                    blaschke_p = [=] (const double & q2) -> complex<double> { return this->blaschke_p_rho(q2); };
                 }
                 else if (_opt_omega_pole.value() == "on")
                 {
-                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_omega, *this, std::placeholders::_1);
+                    blaschke_p = [=] (const double & q2) -> complex<double> { return this->blaschke_p_omega(q2); };
                 }
             }
 
@@ -846,19 +846,19 @@ namespace eos
                 _re_t_omega(p["0->pipi::Re{t_omega}@EGJvD2020"], *this),
                 _im_t_omega(p["0->pipi::Im{t_omega}@EGJvD2020"], *this),
 
-                blaschke_p(std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_no_pole, *this, std::placeholders::_1))
+                blaschke_p([=] (const double &) -> double { return 1.0; })
             {
                 if ((_opt_rho_pole.value() == "on") && (_opt_omega_pole.value() == "on"))
                 {
-                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_rho_omega, *this, std::placeholders::_1);
+                    blaschke_p = [=] (const double & q2) -> double { return this->blaschke_p_rho(q2) * this->blaschke_p_omega(q2); };
                 }
                 else if (_opt_rho_pole.value() == "on")
                 {
-                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_rho, *this, std::placeholders::_1);
+                    blaschke_p = [=] (const double & q2) -> double { return this->blaschke_p_rho(q2); };
                 }
                 else if (_opt_omega_pole.value() == "on")
                 {
-                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_omega, *this, std::placeholders::_1);
+                    blaschke_p = [=] (const double & q2) -> double { return this->blaschke_p_omega(q2); };
                 }
             }
 

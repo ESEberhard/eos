@@ -736,6 +736,13 @@ GKPR:2013A:
     id: oai:arXiv.org:1305.5432
   inspire-id: Gelhausen:2013wia
   title: Decay constants of heavy-light vector mesons from QCD sum rules
+GKPRdEY:2011A:
+  authors: R. García- Martín, R. Kamiński, J. R. Peláez, J. Ruiz de Elvira, F. J. Ynduráin 
+  eprint:
+    archive: arXiv
+    id: oai:arXiv.org:1102.2183
+  inspire-id: GarciaMartin:2011cn
+  title: The pion-pion scattering amplitude. IV:Improved analysis with once subtracted Roy-like equations up to 1100 MeV
 GM:2001A:
   authors: Gambino, Paolo and Misiak, Mikolaj
   eprint:

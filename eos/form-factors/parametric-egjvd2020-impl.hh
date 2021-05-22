@@ -25,6 +25,7 @@
 #include <eos/utils/complex.hh>
 #include <eos/utils/parameters.hh>
 #include <eos/utils/options.hh>
+#include <eos/utils/options-impl.hh>
 #include <eos/utils/qualified-name.hh>
 #include <eos/utils/stringify.hh>
 
@@ -252,6 +253,16 @@ namespace eos
             // parameter for zero point of z
             UsedParameter _t_0;
 
+            // rho pole
+            SwitchOption _opt_rho_pole;
+            UsedParameter _re_t_rho;
+            UsedParameter _im_t_rho;
+
+            // omega pole
+            SwitchOption _opt_omega_pole;
+            UsedParameter _re_t_omega;
+            UsedParameter _im_t_omega;
+
             std::string _par_name(const std::string & ff, const std::string & index) const
             {
                 return stringify(Process_::label) + "::" + "a_" + ff + "^" + index + "@EGJvD2020";
@@ -288,7 +299,10 @@ namespace eos
             }
 
         public:
-            EGJvD2020FormFactorBase(const Parameters & p, const Options &) :
+
+            std::function<complex<double> (const double &)> blaschke_p;
+
+            EGJvD2020FormFactorBase(const Parameters & p, const Options & o) :
                 _a_fp{{
                     UsedParameter(p[_par_name("+", "0")], *this),
                     UsedParameter(p[_par_name("+", "1")], *this),
@@ -411,8 +425,30 @@ namespace eos
                     UsedParameter(p[_par_name("T", "48")], *this),
                     UsedParameter(p[_par_name("T", "49")], *this)
                 }},
-                _t_0(p[stringify(Process_::label) + "::t_0@EGJvD2020"], *this)
+                _t_0(p[stringify(Process_::label) + "::t_0@EGJvD2020"], *this),
+
+                _opt_rho_pole(o, "rho-pole", { "on", "off" }, "off"),
+                _re_t_rho(p["0->pipi::Re{t_rho}@EGJvD2020"], *this),
+                _im_t_rho(p["0->pipi::Im{t_rho}@EGJvD2020"], *this),
+
+                _opt_omega_pole(o, "omega-pole", { "on", "off" }, "off"),
+                _re_t_omega(p["0->pipi::Re{t_omega}@EGJvD2020"], *this),
+                _im_t_omega(p["0->pipi::Im{t_omega}@EGJvD2020"], *this),
+
+                blaschke_p(std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_no_pole, *this, std::placeholders::_1))
             {
+                if ((_opt_rho_pole.value() == "on") && (_opt_omega_pole.value() == "on"))
+                {
+                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_rho_omega, *this, std::placeholders::_1);
+                }
+                else if (_opt_rho_pole.value() == "on")
+                {
+                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_rho, *this, std::placeholders::_1);
+                }
+                else if (_opt_omega_pole.value() == "on")
+                {
+                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, VacuumToPP, false>::blaschke_p_omega, *this, std::placeholders::_1);
+                }
             }
 
             /* f_+ */
@@ -433,13 +469,34 @@ namespace eos
                 return part0 * part1 * part2 * part3;
             }
 
-            complex<double> blaschke_p(const double & q2) const
+            complex<double> blaschke_p_no_pole(const double & q2) const
             {
-                constexpr const complex<double> t_s_p = complex<double>{0.77 * 0.77, 0.77 * 0.1};
-                constexpr const complex<double> t_s_m = complex<double>{0.77 * 0.77, - 0.77 * 0.1};
                 return 1.0;
+            }
+
+            complex<double> blaschke_p_rho(const double & q2) const
+            {
+                const double re_t = this->_re_t_rho;
+                const double im_t = this->_im_t_rho;
+                const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
+                const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
 
                 return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+            }
+
+            complex<double> blaschke_p_omega(const double & q2) const
+            {
+                const double re_t = this->_re_t_omega;
+                const double im_t = this->_im_t_omega;
+                const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
+                const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
+
+                return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+            }
+
+            complex<double> blaschke_p_rho_omega(const double & q2) const
+            {
+                return blaschke_p_omega(q2) * blaschke_p_rho(q2);
             }
 
             complex<double> series_p(const complex<double> & z) const
@@ -628,6 +685,16 @@ namespace eos
                 return result.real();
             }
 
+            // rho pole
+            SwitchOption _opt_rho_pole;
+            UsedParameter _re_t_rho;
+            UsedParameter _im_t_rho;
+
+            // omega pole
+            SwitchOption _opt_omega_pole;
+            UsedParameter _re_t_omega;
+            UsedParameter _im_t_omega;
+
             // double _z(const double & q2, const double & t_0) const
             // {
             //     const double t_p = Process_::t_p;
@@ -643,8 +710,10 @@ namespace eos
                 return _z(q2, t_s);
             }
 
+            std::function<double (const double &)> blaschke_p;
+
         public:
-            EGJvD2020FormFactorBase(const Parameters & p, const Options &) :
+            EGJvD2020FormFactorBase(const Parameters & p, const Options & o) :
                 _a_fp{{
                     UsedParameter(p[_par_name("+", "0")], *this),
                     UsedParameter(p[_par_name("+", "1")], *this),
@@ -767,8 +836,30 @@ namespace eos
                     UsedParameter(p[_par_name("T", "48")], *this),
                     UsedParameter(p[_par_name("T", "49")], *this)
                 }},
-                _t_0(p[stringify(Process_::label) + "::t_0@EGJvD2020"], *this)
+                _t_0(p[stringify(Process_::label) + "::t_0@EGJvD2020"], *this),
+
+                _opt_rho_pole(o, "rho-pole", { "on", "off" }, "off"),
+                _re_t_rho(p["0->pipi::Re{t_rho}@EGJvD2020"], *this),
+                _im_t_rho(p["0->pipi::Im{t_rho}@EGJvD2020"], *this),
+
+                _opt_omega_pole(o, "omega-pole", { "on", "off" }, "off"),
+                _re_t_omega(p["0->pipi::Re{t_omega}@EGJvD2020"], *this),
+                _im_t_omega(p["0->pipi::Im{t_omega}@EGJvD2020"], *this),
+
+                blaschke_p(std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_no_pole, *this, std::placeholders::_1))
             {
+                if ((_opt_rho_pole.value() == "on") && (_opt_omega_pole.value() == "on"))
+                {
+                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_rho_omega, *this, std::placeholders::_1);
+                }
+                else if (_opt_rho_pole.value() == "on")
+                {
+                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_rho, *this, std::placeholders::_1);
+                }
+                else if (_opt_omega_pole.value() == "on")
+                {
+                    blaschke_p = std::bind(& EGJvD2020FormFactorBase<Process_, PToP, false>::blaschke_p_omega, *this, std::placeholders::_1);
+                }
             }
 
             /* f_+ */
@@ -789,13 +880,33 @@ namespace eos
                 return part0 * part1 * part2 * part3;
             }
 
-            double blaschke_p(const double & q2) const
+            double blaschke_p_no_pole(const double & q2) const
             {
-                constexpr const complex<double> t_s_p = complex<double>{0.77 * 0.77, 0.77 * 0.1};
-                constexpr const complex<double> t_s_m = complex<double>{0.77 * 0.77, - 0.77 * 0.1};
                 return 1.0;
+            }
+
+            double blaschke_p_rho(const double & q2) const
+            {
+                const double re_t = this->_re_t_rho;
+                const double im_t = this->_im_t_rho;
+                const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
+                const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
 
                 return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+            }
+            double blaschke_p_omega(const double & q2) const
+            {
+                const double re_t = this->_re_t_omega;
+                const double im_t = this->_im_t_omega;
+                const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
+                const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
+
+                return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+            }
+
+            double blaschke_p_rho_omega(const double & q2) const
+            {
+                return blaschke_p_omega(q2) * blaschke_p_rho(q2);
             }
 
             double series_p(const double & z) const

@@ -3794,4 +3794,28 @@ groups:
           max:     +0.075076 #4 M_pi²
           latex:    '$M_R^2$'
           comments: ''
+      '0->pipi::Re{t_rho}@EGJvD2020' :
+          central: 0.775
+          min:     0.700
+          max:     0.850
+          latex:    '$\Re(t_\rho)$'
+          comments: ''
+      '0->pipi::Im{t_rho}@EGJvD2020' :
+          central: 0.20
+          min:     0.05
+          max:     0.35
+          latex:    '$\Im(t_\rho)$'
+          comments: ''
+      '0->pipi::Re{t_omega}@EGJvD2020' :
+          central: 0.7825
+          min:     0.7700
+          max:     0.7900
+          latex:    '$\Re(t_\omega)$'
+          comments: ''
+      '0->pipi::Im{t_omega}@EGJvD2020' :
+          central: 0.010
+          min:     0.001
+          max:     0.020
+          latex:    '$\Im(t_\omega)$'
+          comments: ''
   # }}}

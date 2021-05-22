@@ -339,6 +339,15 @@ BaBar:2012D:
   inspire-id: Lees:2012vv
   title: Branching fraction and form-factor shape measurements of exclusive charmless
     semileptonic B decays, and determination of $|V_{ub}|$
+BaBar:2012E:
+  authors: Lees, J.P. et al.
+  collaboration: BaBar
+  eprint:
+    archive: arXiv
+    id: oai:arXiv.org:1205.2228
+  inspire-id: Lees:2012cj
+  title: Precise Measurement of the $e^+ e^- \to \pi^+ \pi^- (\gamma)$ Cross Section with the
+    Initial-State Radiation Method at BABAR
 BaBar:2013A:
   authors: Lees, J.P. et al.
   collaboration: BaBar

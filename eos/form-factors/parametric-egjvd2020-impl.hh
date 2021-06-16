@@ -476,12 +476,13 @@ namespace eos
 
             complex<double> blaschke_p_rho(const double & q2) const
             {
+                // TODO: Check: is the convention for the Blaschke factor correct
                 const double re_t = this->_re_t_rho;
                 const double im_t = this->_im_t_rho;
                 const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
                 const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
 
-                return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+                return sqrt(_z(q2, t_s_p) * _z(q2, t_s_m));
             }
 
             complex<double> blaschke_p_omega(const double & q2) const
@@ -491,7 +492,7 @@ namespace eos
                 const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
                 const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
 
-                return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+                return sqrt(_z(q2, t_s_p) * _z(q2, t_s_m));
             }
 
             complex<double> blaschke_p_rho_omega(const double & q2) const
@@ -892,7 +893,7 @@ namespace eos
                 const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
                 const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
 
-                return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+                return sqrt(_z(q2, t_s_p) * _z(q2, t_s_m));
             }
             double blaschke_p_omega(const double & q2) const
             {
@@ -901,7 +902,7 @@ namespace eos
                 const complex<double> t_s_p = complex<double>{re_t * re_t,   re_t * im_t};
                 const complex<double> t_s_m = complex<double>{re_t * re_t, - re_t * im_t};
 
-                return 1.0 / (_z(q2, t_s_p) * _z(q2, t_s_m));
+                return sqrt(_z(q2, t_s_p) * _z(q2, t_s_m));
             }
 
             double blaschke_p_rho_omega(const double & q2) const
